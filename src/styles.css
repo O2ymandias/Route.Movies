@@ -1,1 +1,12 @@
-/* You can add global styles to this file, and also import other style files */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .home__activePage {
+    @apply bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-white !important;
+  }
+  .nav__activeLink {
+    @apply text-blue-700 !important;
+  }
+}
