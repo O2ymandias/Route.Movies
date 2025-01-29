@@ -17,7 +17,6 @@ import { CardComponent } from '../card/card.component';
   styleUrl: './home.component.css',
 })
 export class HomeComponent implements OnInit, AfterViewInit {
-
   // Properties
   private readonly _moviesService: MoviesService = inject(MoviesService);
   movies: IMovie[] = [];
@@ -28,6 +27,11 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
   // Hooks
   ngOnInit(): void {
+    if (
+      typeof window !== 'undefined' &&
+      window.localStorage.getItem('pageNumber')
+    )
+      this.pageNumber = Number(window.localStorage.getItem('pageNumber'));
     this.getMovies(this.pageNumber);
   }
   ngAfterViewInit(): void {
@@ -50,18 +54,19 @@ export class HomeComponent implements OnInit, AfterViewInit {
   onPageClick(pageNum: number): void {
     this.getMovies(pageNum);
     this.activePage();
+    window.localStorage.setItem('pageNumber', `${this.pageNumber}`);
   }
 
   activePage(): void {
-    Array.from(this.paginationElement.nativeElement
-      .querySelectorAll('a'))
-      .forEach((anchor) => anchor.classList.remove('home__activePage'));
+    Array.from(
+      this.paginationElement.nativeElement.querySelectorAll('a'),
+    ).forEach((anchor) => anchor.classList.remove('home__activePage'));
 
-    Array.from(this.paginationElement.nativeElement
-      .querySelectorAll('a'))
-      .forEach((anchor) => {
-        if (Number(anchor.textContent) === this.pageNumber)
-          anchor.classList.add('home__activePage');
-      });
+    Array.from(
+      this.paginationElement.nativeElement.querySelectorAll('a'),
+    ).forEach((anchor) => {
+      if (Number(anchor.textContent) === this.pageNumber)
+        anchor.classList.add('home__activePage');
+    });
   }
 }
