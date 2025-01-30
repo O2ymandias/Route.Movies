@@ -3,12 +3,14 @@ import {
   Component,
   ElementRef,
   inject,
+  OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
 import { MoviesService } from '../../services/movies.service';
 import { IMovie } from '../../interfaces/imovie';
 import { CardComponent } from '../card/card.component';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -16,9 +18,10 @@ import { CardComponent } from '../card/card.component';
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })
-export class HomeComponent implements OnInit, AfterViewInit {
+export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   // Properties
   private readonly _moviesService: MoviesService = inject(MoviesService);
+  private _moviesSubscription: Subscription | null = null;
   movies: IMovie[] = [];
   pageNumber: number = 1;
   baseImgPath: string = 'https://image.tmdb.org/t/p/w500';
@@ -38,17 +41,24 @@ export class HomeComponent implements OnInit, AfterViewInit {
     this.activePage();
   }
 
+  ngOnDestroy(): void {
+    console.log('On Destroyed Called');
+    if (this._moviesSubscription) this._moviesSubscription.unsubscribe();
+  }
+
   // Methods
   getMovies(pageNum: number): void {
     this.pageNumber = pageNum;
     if (this.pageNumber < 1) this.pageNumber = 1;
     if (this.pageNumber > this.totalPages) this.pageNumber = this.totalPages;
-    this._moviesService.getTopMovies(this.pageNumber).subscribe({
-      next: (response) => {
-        this.movies = response.results;
-        this.totalPages = response.total_pages;
-      },
-    });
+    this._moviesSubscription = this._moviesService
+      .getTopMovies(this.pageNumber)
+      .subscribe({
+        next: (response) => {
+          this.movies = response.results;
+          this.totalPages = response.total_pages;
+        },
+      });
   }
 
   onPageClick(pageNum: number): void {
